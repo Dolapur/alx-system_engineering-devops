@@ -1,0 +1,1 @@
+Navigation through shell permissions
