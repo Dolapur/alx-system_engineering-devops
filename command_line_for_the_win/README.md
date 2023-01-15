@@ -1,1 +1,1 @@
-Solution to the command line for the win
+Solutions to the command line for the win
