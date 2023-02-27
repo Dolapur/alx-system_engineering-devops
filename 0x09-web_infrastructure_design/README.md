@@ -1,1 +1,2 @@
-web_infrastructure_design
+# Web infrastructure design
+  Files in this project contain links to each respective whiteboard diagram.
