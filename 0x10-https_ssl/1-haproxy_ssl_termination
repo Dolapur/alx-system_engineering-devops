@@ -33,17 +33,31 @@ defaults
         errorfile 504 /etc/haproxy/errors/504.http
 
 frontend  dolapo-frontend
-        bind *:80
+	bind *:80
         mode http
         http-request set-header X-Forwarded-Proto http
-        default_backend dolapo-backend
+        redirect scheme https if !{ ssl_fc }
+        default_backend dolapo-backend-www
 
-frontend dolapo-frontend-https
-        bind *:443 ssl crt /etc/haproxy/certs/www.dolapo.tech.pem
-	http-request set-header X-Forwarded-Proto https
-        default_backend dolapo-backend
+frontend dolapo-www-https
+        bind *:443 ssl crt /etc/letsencrypt/live/www.dolapo.tech/fullchain.pem
+        # Path to the SSL certificate obtained from Certbot
+        default_backend backend-www
 
-backend dolapo-backend
+backend dolapo-backend-www
         balance roundrobin
         server 151059-web-01 54.242.167.107:80 check
         server 151059-web-02 100.25.48.54:80 check
+
+frontend dolapo-root-https
+        bind *:443 ssl crt /etc/letsencrypt/live/www.dolapo.tech/fullchain.pem
+        acl is_root path /
+	http-request set-var(txn.path) path
+        http-request set-header X-Forwarded-Proto https
+        http-request redirect scheme https code 301 unless { ssl_fc }
+        default_backend dolapo-backend-root
+backend dolapo-backend-root
+        mode http
+        balance roundrobin
+        http-response set-header Content-Type text/html
+        http-response set-body "Holberton School"
